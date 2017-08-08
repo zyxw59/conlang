@@ -304,3 +304,44 @@ func TestApply(t *testing.T) {
 		}
 	}
 }
+
+func TestApplyFile(t *testing.T) {
+	tables := []struct {
+		word   string
+		output string
+		err    bool
+	}{
+		{
+			word:   "bp",
+			output: "pp",
+			err:    false,
+		},
+		{
+			word:   "mbp",
+			output: "mbp",
+			err:    false,
+		},
+	}
+	filename := "test_sc"
+	rl, err := LoadFile(filename)
+	if err != nil {
+		t.Fatalf("LoadFile(%#v) incorrectly produced the error %#v", filename, err)
+	}
+	crl, err := rl.Compile()
+	if err != nil {
+		t.Fatalf("%v.Compile() incorrectly produced the error %#v", rl, err)
+	}
+	for _, tab := range tables {
+		output, err := crl.Apply(tab.word)
+		switch {
+		case tab.err && err == nil:
+			t.Errorf("Apply(%#v) failed to produce an error", tab.word)
+		case !tab.err && err != nil:
+			t.Errorf("Apply(%#v) incorrectly produced the error %#v", tab.word, err)
+		case !tab.err && err == nil:
+			if tab.output != output {
+				t.Errorf("Apply(%#v) produced the output %#v instead of %#v", tab.word, output, tab.output)
+			}
+		}
+	}
+}

@@ -35,11 +35,28 @@ func (m Match) Equal(other Match) bool {
 	return true
 }
 
+// Apply applies all the rules in a CompiledRuleList to a word and returns its
+// new value
+func (crl *CompiledRuleList) Apply(word string) (output string, err error) {
+	output = word
+	for _, r := range crl.Rules {
+		output, err = r.Apply(output)
+		if err != nil {
+			return "", err
+		}
+	}
+	return output, nil
+}
+
 // Apply applies the rule to the string, and returns its new value
 func (cr *CompiledRule) Apply(word string) (string, error) {
 	// first, get matches:
 	matches := cr.FindMatches(word)
 	parts := make([]string, 2*len(matches)+1)
+	if len(matches) == 0 {
+		// no matches, do nothing
+		return word, nil
+	}
 	parts[0] = word[:matches[0].Start]
 	for i, m := range matches {
 		repl, err := cr.Categories.Replace(cr.To, m.Indices)
@@ -115,6 +132,10 @@ func (cp *compiledPattern) categoryMatch(word string, indices map[int]int) map[i
 	}
 	// match has type []string
 	match := cp.FindStringSubmatch(word)
+	if len(match) == 0 {
+		// no match
+		return nil
+	}
 	idxs := make(map[int]int)
 	if indices != nil {
 		// make local copy of indices

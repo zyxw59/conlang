@@ -25,6 +25,25 @@ func parenReplacer(match string) string {
 	return fmt.Sprintf("(?:%s", match)
 }
 
+type CompiledRuleList struct {
+	Rules []*CompiledRule
+}
+
+// Compile compiles a RuleList into an object that can be easily applied to
+// words
+func (rl *RuleList) Compile() (crl *CompiledRuleList, err error) {
+	crl = &CompiledRuleList{
+		Rules: make([]*CompiledRule, len(rl.Rules)),
+	}
+	for i, r := range rl.Rules {
+		crl.Rules[i], err = r.Compile(rl.Categories)
+		if err != nil {
+			return nil, err
+		}
+	}
+	return crl, nil
+}
+
 type CompiledRule struct {
 	From                             *compiledPattern
 	To                               string
