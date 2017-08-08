@@ -3,11 +3,48 @@ package sounds
 import (
 	"fmt"
 	"sort"
+	"strconv"
 	"strings"
 )
 
 // A CategoryList is a map of strings to categories
 type CategoryList map[string]*Category
+
+// Replace replaces all instances of a numbered category with the
+// appropriate element of that category
+func (cl CategoryList) Replace(text string, indices map[int]int) (string, error) {
+	var err error
+	replacer := func(match string) string {
+		if err != nil {
+			// if there's already an error, don't bother
+			return ""
+		}
+		groups := catMatcher.FindStringSubmatch(match)
+		cat, ok := cl[groups[2]]
+		if !ok {
+			err = fmt.Errorf("replacement error: category %#v is not defined", groups[2])
+			return ""
+		}
+		if groups[1] == "" {
+			// unnumbered category in replacement text, error
+			err = fmt.Errorf("replacement error: unnumbered category %#v in replacement text", groups[2])
+			return ""
+		}
+		// numbered category
+		n, err_ := strconv.Atoi(groups[1])
+		if err_ != nil {
+			err = err_
+			return ""
+		}
+		i := indices[n]
+		if i >= cat.Len() || i < 0 {
+			err = fmt.Errorf("replacement error: invalid index %#v for category %#v", groups[2])
+			return ""
+		}
+		return cat.Get(i)
+	}
+	return catMatcher.ReplaceAllStringFunc(text, replacer), err
+}
 
 // Equal compares two CategoryLists by value
 func (cl CategoryList) Equal(other CategoryList) bool {
@@ -75,12 +112,20 @@ func (c *Category) Equal(other *Category) bool {
 	return true
 }
 
+// String writes the category as a space-separated list
 func (c *Category) String() string {
 	return strings.Join(c.values, " ")
 }
 
+// Pattern writes the category as a `|`-separated list, for use in a regular
+// expression
 func (c *Category) Pattern() string {
 	return strings.Join(c.sorted, "|")
+}
+
+// Get returns the i-th element of the category
+func (c *Category) Get(index int) string {
+	return c.values[index]
 }
 
 // Len returns the size of the category

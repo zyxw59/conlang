@@ -29,6 +29,7 @@ type CompiledRule struct {
 	From                             *compiledPattern
 	To                               string
 	Before, After, UnBefore, UnAfter *compiledPattern
+	Categories                       CategoryList
 }
 
 func (cr *CompiledRule) Equal(other *CompiledRule) bool {
@@ -48,6 +49,9 @@ func (cr *CompiledRule) Equal(other *CompiledRule) bool {
 		return false
 	}
 	if !cr.UnAfter.Equal(other.UnAfter) {
+		return false
+	}
+	if !cr.Categories.Equal(other.Categories) {
 		return false
 	}
 	return true
@@ -86,7 +90,13 @@ func (cp *compiledPattern) Equal(other *compiledPattern) bool {
 // to find matches
 func (r *Rule) Compile(categories CategoryList) (*CompiledRule, error) {
 	var from, before, after, unBefore, unAfter *compiledPattern
-	from, err := compilePattern(r.From, categories)
+	var to string
+	var err error
+	if r.From == "0" {
+		from, err = compilePattern("", categories)
+	} else {
+		from, err = compilePattern(r.From, categories)
+	}
 	if err != nil {
 		return nil, err
 	}
@@ -110,13 +120,19 @@ func (r *Rule) Compile(categories CategoryList) (*CompiledRule, error) {
 			return nil, err
 		}
 	}
+	if r.To == "0" {
+		to = ""
+	} else {
+		to = r.To
+	}
 	return &CompiledRule{
-		From:     from,
-		To:       r.To,
-		Before:   before,
-		After:    after,
-		UnBefore: unBefore,
-		UnAfter:  unAfter,
+		From:       from,
+		To:         to,
+		Before:     before,
+		After:      after,
+		UnBefore:   unBefore,
+		UnAfter:    unAfter,
+		Categories: categories,
 	}, nil
 }
 

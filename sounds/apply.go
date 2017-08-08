@@ -1,5 +1,9 @@
 package sounds
 
+import (
+	"strings"
+)
+
 type Match struct {
 	Start   int
 	End     int
@@ -29,6 +33,27 @@ func (m Match) Equal(other Match) bool {
 		}
 	}
 	return true
+}
+
+// Apply applies the rule to the string, and returns its new value
+func (cr *CompiledRule) Apply(word string) (string, error) {
+	// first, get matches:
+	matches := cr.FindMatches(word)
+	parts := make([]string, 2*len(matches)+1)
+	parts[0] = word[:matches[0].Start]
+	for i, m := range matches {
+		repl, err := cr.Categories.Replace(cr.To, m.Indices)
+		if err != nil {
+			return "", err
+		}
+		parts[2*i+1] = repl
+		if i == len(matches)-1 {
+			parts[2*i+2] = word[m.End:]
+		} else {
+			parts[2*i+2] = word[m.End:matches[i+1].Start]
+		}
+	}
+	return strings.Join(parts, ""), nil
 }
 
 // FindMatches finds and returns a list of all valid matches of the rule in the

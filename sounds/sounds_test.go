@@ -164,13 +164,21 @@ func TestFindMatches(t *testing.T) {
 			},
 		},
 		{
-			rule: "a > e / n_n",
-			word: "nanananan",
+			rule: "a > e / N_N",
+			word: "NaNaNaNaN",
 			matches: []Match{
 				{Start: 1, End: 2, Indices: map[int]int{}},
 				{Start: 3, End: 4, Indices: map[int]int{}},
 				{Start: 5, End: 6, Indices: map[int]int{}},
 				{Start: 7, End: 8, Indices: map[int]int{}},
+			},
+		},
+		{
+			rule: "NaN > NeN",
+			word: "NaNaNaNaN",
+			matches: []Match{
+				{Start: 0, End: 3, Indices: map[int]int{}},
+				{Start: 4, End: 7, Indices: map[int]int{}},
 			},
 		},
 		{
@@ -221,6 +229,78 @@ func TestFindMatches(t *testing.T) {
 				continue
 			}
 			t.Errorf("CompiledRule(%#v).FindMatches(%#v) incorrectly found match number %#v, %#v", tab.rule, tab.word, i, m)
+		}
+	}
+}
+
+func TestApply(t *testing.T) {
+	tables := []struct {
+		rule   string
+		word   string
+		output string
+		err    bool
+	}{
+		{
+			rule:   "a > e",
+			word:   "banana",
+			output: "benene",
+			err:    false,
+		},
+		{
+			rule:   "a > e / N_N",
+			word:   "NaNaNaNaN",
+			output: "NeNeNeNeN",
+			err:    false,
+		},
+		{
+			rule:   "NaN > NeN",
+			word:   "NaNaNaNaN",
+			output: "NeNaNeNaN",
+			err:    false,
+		},
+		{
+			rule:   "{0:P} > {0:N}",
+			word:   "ta",
+			output: "na",
+			err:    false,
+		},
+		{
+			rule:   "{0:N} > 0 / _{0:P}",
+			word:   "mtnt",
+			output: "mtt",
+			err:    false,
+		},
+		{
+			rule:   "a > 0 ! _{0:P}{0:P}",
+			word:   "app akt",
+			output: "app kt",
+			err:    false,
+		},
+	}
+	rl := NewRuleList()
+	rl.ParseRuleCat("P = p t k")
+	rl.ParseRuleCat("N = m n ŋ")
+	for _, tab := range tables {
+		rule, err := rl.parseRule(tab.rule)
+		if err != nil {
+			t.Errorf("RuleList.parseRule(%#v) incorrectly produced the error %#v", tab.rule, err)
+			continue
+		}
+		cr, err := rule.Compile(rl.Categories)
+		if err != nil {
+			t.Errorf("Rule.Compile(%#v) incorrectly produced the error %#v", tab.rule, err)
+			continue
+		}
+		output, err := cr.Apply(tab.word)
+		switch {
+		case tab.err && err == nil:
+			t.Errorf("Apply(%#v, %#v) failed to produce an error", tab.rule, tab.word)
+		case !tab.err && err != nil:
+			t.Errorf("Apply(%#v, %#v) incorrectly produced the error %#v", tab.rule, tab.word, err)
+		case !tab.err && err == nil:
+			if tab.output != output {
+				t.Errorf("Apply(%#v, %#v) produced the output %#v instead of %#v", tab.rule, tab.word, output, tab.output)
+			}
 		}
 	}
 }
