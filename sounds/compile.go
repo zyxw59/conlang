@@ -32,12 +32,24 @@ type CompiledRule struct {
 }
 
 func (cr *CompiledRule) Equal(other *CompiledRule) bool {
-	if !cr.From.Equal(other.From) {return false}
-	if cr.To != other.To {return false}
-	if !cr.Before.Equal(other.Before) {return false}
-	if !cr.After.Equal(other.After) {return false}
-	if !cr.UnBefore.Equal(other.UnBefore) {return false}
-	if !cr.UnAfter.Equal(other.UnAfter) {return false}
+	if !cr.From.Equal(other.From) {
+		return false
+	}
+	if cr.To != other.To {
+		return false
+	}
+	if !cr.Before.Equal(other.Before) {
+		return false
+	}
+	if !cr.After.Equal(other.After) {
+		return false
+	}
+	if !cr.UnBefore.Equal(other.UnBefore) {
+		return false
+	}
+	if !cr.UnAfter.Equal(other.UnAfter) {
+		return false
+	}
 	return true
 }
 
@@ -99,12 +111,12 @@ func (r *Rule) Compile(categories CategoryList) (*CompiledRule, error) {
 		}
 	}
 	return &CompiledRule{
-		From:       from,
-		To:         r.To,
-		Before:     before,
-		After:      after,
-		UnBefore:   unBefore,
-		UnAfter:    unAfter,
+		From:     from,
+		To:       r.To,
+		Before:   before,
+		After:    after,
+		UnBefore: unBefore,
+		UnAfter:  unAfter,
 	}, nil
 }
 
