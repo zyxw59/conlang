@@ -27,18 +27,14 @@ func LoadFile(filename string) (*RuleList, error) {
 }
 
 // ApplyFile loads a file and applies it to a word
-func ApplyFile(filename, word string) (output string, err error) {
+func ApplyFile(filename, word string) (output string, debug []string, err error) {
 	rl, err := LoadFile(filename)
 	if err != nil {
-		return "", err
+		return "", nil, err
 	}
-	crl, err := rl.Compile()
+	output, debug, err = rl.Apply(word)
 	if err != nil {
-		return "", err
+		return "", debug, err
 	}
-	output, err = crl.Apply(word)
-	if err != nil {
-		return "", err
-	}
-	return output, nil
+	return output, debug, err
 }

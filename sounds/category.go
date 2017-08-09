@@ -112,8 +112,19 @@ func (c *Category) Equal(other *Category) bool {
 	return true
 }
 
-// String writes the category as a space-separated list
+func (c *Category) Apply(word string) (output, debug string, err error) {
+	return word, c.String(), nil
+}
+
+// String writes the category as it would appear in a sound change file, as a
+// category name, followed by an equals sign, followed by a space separated
+// list of its elements
 func (c *Category) String() string {
+	return fmt.Sprintf("%s = %s", c.Name, strings.Join(c.values, " "))
+}
+
+// ElemString writes the elements of the category as a space separated list
+func (c *Category) ElemString() string {
 	return strings.Join(c.values, " ")
 }
 

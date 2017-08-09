@@ -1,6 +1,7 @@
 package sounds
 
 import (
+	"fmt"
 	"strings"
 )
 
@@ -35,33 +36,34 @@ func (m Match) Equal(other Match) bool {
 	return true
 }
 
-// Apply applies all the rules in a CompiledRuleList to a word and returns its
-// new value
-func (crl *CompiledRuleList) Apply(word string) (output string, err error) {
+// Apply applies all the rules in a RuleList to a word and returns its new
+// value, along with the debugging strings, or an error value
+func (rl *RuleList) Apply(word string) (output string, debug []string, err error) {
 	output = word
-	for _, r := range crl.Rules {
-		output, err = r.Apply(output)
+	debug = make([]string, len(rl.Lines))
+	for i, l := range rl.Lines {
+		output, debug[i], err = l.Apply(output)
 		if err != nil {
-			return "", err
+			return "", debug, err
 		}
 	}
-	return output, nil
+	return output, debug, nil
 }
 
 // Apply applies the rule to the string, and returns its new value
-func (cr *CompiledRule) Apply(word string) (string, error) {
+func (cr *CompiledRule) Apply(word string) (output, debug string, err error) {
 	// first, get matches:
 	matches := cr.FindMatches(word)
-	parts := make([]string, 2*len(matches)+1)
 	if len(matches) == 0 {
 		// no matches, do nothing
-		return word, nil
+		return word, fmt.Sprintf("%v  %v", cr, word), nil
 	}
+	parts := make([]string, 2*len(matches)+1)
 	parts[0] = word[:matches[0].Start]
 	for i, m := range matches {
 		repl, err := cr.Categories.Replace(cr.To, m.Indices)
 		if err != nil {
-			return "", err
+			return "", fmt.Sprintf("%v  %v", cr, word), err
 		}
 		parts[2*i+1] = repl
 		if i == len(matches)-1 {
@@ -70,7 +72,8 @@ func (cr *CompiledRule) Apply(word string) (string, error) {
 			parts[2*i+2] = word[m.End:matches[i+1].Start]
 		}
 	}
-	return strings.Join(parts, ""), nil
+	output = strings.Join(parts, "")
+	return output, fmt.Sprintf("%v  %v", cr, output), nil
 }
 
 // FindMatches finds and returns a list of all valid matches of the rule in the

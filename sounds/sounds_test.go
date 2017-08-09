@@ -124,10 +124,22 @@ func TestCompileRule(t *testing.T) {
 		{
 			rule: &Rule{From: "a", To: "b"},
 			cr: &CompiledRule{
-				From:   &compiledPattern{regexp.MustCompile("a"), []numCat{}, CategoryList{}},
-				To:     "b",
-				Before: &compiledPattern{regexp.MustCompile("$"), []numCat{}, CategoryList{}},
-				After:  &compiledPattern{regexp.MustCompile("^"), []numCat{}, CategoryList{}},
+				From: &compiledPattern{
+					regexp.MustCompile("a"),
+					[]numCat{},
+					CategoryList{},
+				},
+				To: "b",
+				Before: &compiledPattern{
+					regexp.MustCompile("$"),
+					[]numCat{},
+					CategoryList{},
+				},
+				After: &compiledPattern{
+					regexp.MustCompile("^"),
+					[]numCat{},
+					CategoryList{},
+				},
 			},
 			err: false,
 		},
@@ -291,7 +303,7 @@ func TestApply(t *testing.T) {
 			t.Errorf("Rule.Compile(%#v) incorrectly produced the error %#v", tab.rule, err)
 			continue
 		}
-		output, err := cr.Apply(tab.word)
+		output, _, err := cr.Apply(tab.word)
 		switch {
 		case tab.err && err == nil:
 			t.Errorf("Apply(%#v, %#v) failed to produce an error", tab.rule, tab.word)
@@ -327,12 +339,8 @@ func TestApplyFile(t *testing.T) {
 	if err != nil {
 		t.Fatalf("LoadFile(%#v) incorrectly produced the error %#v", filename, err)
 	}
-	crl, err := rl.Compile()
-	if err != nil {
-		t.Fatalf("%v.Compile() incorrectly produced the error %#v", rl, err)
-	}
 	for _, tab := range tables {
-		output, err := crl.Apply(tab.word)
+		output, _, err := rl.Apply(tab.word)
 		switch {
 		case tab.err && err == nil:
 			t.Errorf("Apply(%#v) failed to produce an error", tab.word)
