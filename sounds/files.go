@@ -27,7 +27,7 @@ func LoadFile(filename string) (*RuleList, error) {
 }
 
 // ApplyFile loads a file and applies it to a word
-func ApplyFile(filename, word string) (output string, debug []string, err error) {
+func ApplyFile(word, filename string) (output string, debug []string, err error) {
 	rl, err := LoadFile(filename)
 	if err != nil {
 		return "", nil, err
@@ -36,5 +36,18 @@ func ApplyFile(filename, word string) (output string, debug []string, err error)
 	if err != nil {
 		return "", debug, err
 	}
-	return output, debug, err
+	return output, debug, nil
+}
+
+// ApplyFiles loads a list of files and applies them to a word in sequence
+func ApplyFiles(word, files ...string) (output string, debug []string, err error) {
+	debug = make([]string, len(files))
+	output = word
+	for i, f := range files {
+		output, debug[i], err = ApplyFile(output, f)
+		if err != nil {
+			return "", debug, err
+		}
+	}
+	return output, debug, nil
 }
