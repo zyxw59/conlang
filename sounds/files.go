@@ -28,32 +28,6 @@ func LoadFile(filename string) (*RuleList, error) {
 	return rl, nil
 }
 
-// ApplyFile loads a file and applies it to a word
-func ApplyFile(word, filename string) (output string, debug []string, err error) {
-	rl, err := LoadFile(filename)
-	if err != nil {
-		return "", nil, err
-	}
-	output, debug, err = rl.Apply(word)
-	if err != nil {
-		return "", debug, err
-	}
-	return output, debug, nil
-}
-
-// ApplyFiles loads a list of files and applies them to a word in sequence
-func ApplyFiles(word string, files ...string) (output string, debug []string, err error) {
-	debugs := make([][]string, len(files))
-	output = word
-	for i, f := range files {
-		output, debugs[i], err = ApplyFile(output, f)
-		if err != nil {
-			return "", debug, err
-		}
-	}
-	return output, stringSliceConcat(debugs...), nil
-}
-
 func stringSliceConcat(slices ...[]string) []string {
 	length := 0
 	for _, sl := range slices {
