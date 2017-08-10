@@ -49,6 +49,19 @@ func (c *Cache) LoadFile(filename string) (rl *RuleList, err error) {
 	return rl, nil
 }
 
+// LoadFiles loads multiple files and caches their contents, or returns the
+// cached contents if they are as new as the relevant file
+func (c *Cache) LoadFiles(files ...string) (rls []*RuleList, err error) {
+	rls = make([]*RuleList, len(files))
+	for i, f := range files {
+		rls[i], err = c.LoadFile(f)
+		if err != nil {
+			return nil, err
+		}
+	}
+	return rls, nil
+}
+
 // ApplyFile applies a sound change file to a word
 func (c *Cache) ApplyFile(word, filename string) (output string, debug []string, err error) {
 	rl, err := c.LoadFile(filename)
@@ -63,21 +76,36 @@ func (c *Cache) ApplyFiles(word string, files ...string) (output string, debug [
 	debugs := make([][]string, len(files))
 	output = word
 	for i, f := range files {
-		output, debugs[i], err = c.ApplyFile(output, f)
+		var db []string
+		output, db, err = c.ApplyFile(output, f)
 		if err != nil {
 			return "", debug, err
 		}
+		debugs[i] = make([]string, 1, len(db)+1)
+		debugs[i][0] = f
+		debugs[i] = append(debugs[i], db...)
 	}
 	return output, stringSliceConcat(debugs...), nil
+}
+
+// LoadPairs loads multiple files and caches their contents, using a prefix for
+// all filenames. It returns cached content if the cache is as recent as the
+// files
+func (c *Cache) LoadPairs(prefix string, names ...string) ([]*RuleList, error) {
+	pairs, err := Pairs(names...)
+	if err != nil {
+		return nil, err
+	}
+	files := prefixSlice(pairs, prefix)
+	return c.LoadFiles(files...)
 }
 
 // ApplyPairs applies a series of sound changes to a word, using a prefix for
 // all filenames
 func (c *Cache) ApplyPairs(word, prefix string, names ...string) (string, []string, error) {
 	pairs, err := Pairs(names...)
-	var debug []string
 	if err != nil {
-		return "", debug, err
+		return "", nil, err
 	}
 	files := prefixSlice(pairs, prefix)
 	return c.ApplyFiles(word, files...)

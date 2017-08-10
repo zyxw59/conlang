@@ -22,7 +22,7 @@ func parenReplacer(match string) string {
 	if match[1] == '?' {
 		return match
 	}
-	return fmt.Sprintf("(?:%s", match)
+	return fmt.Sprintf("(?:%s", match[1])
 }
 
 type CompiledRule struct {
