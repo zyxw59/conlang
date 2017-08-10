@@ -125,20 +125,14 @@ func TestCompileRule(t *testing.T) {
 			rule: &Rule{From: "a", To: "b"},
 			cr: &CompiledRule{
 				From: &compiledPattern{
-					regexp.MustCompile("a"),
-					[]numCat{},
-					CategoryList{},
+					Regexp: regexp.MustCompile("a"),
 				},
 				To: "b",
 				Before: &compiledPattern{
-					regexp.MustCompile("$"),
-					[]numCat{},
-					CategoryList{},
+					Regexp: regexp.MustCompile("$"),
 				},
 				After: &compiledPattern{
-					regexp.MustCompile("^"),
-					[]numCat{},
-					CategoryList{},
+					Regexp: regexp.MustCompile("^"),
 				},
 			},
 			err: false,
