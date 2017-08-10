@@ -353,3 +353,48 @@ func TestApplyFile(t *testing.T) {
 		}
 	}
 }
+
+func TestPairs(t *testing.T) {
+	tables := []struct {
+		names  []string
+		output []string
+		err    bool
+	}{
+		{
+			names: []string{"", ".a.b.c"},
+			output: []string{"a", "a.b", "a.b.c"},
+			err: false,
+		},
+		{
+			names: []string{"", ".a.b.c", "c", ".d.e"},
+			output: []string{"a", "a.b", "a.b.c", "c.d", "c.d.e"},
+			err: false,
+		},
+		{
+			names: []string{"", "a.b.c"},
+			output: nil,
+			err: true,
+		},
+		{
+			names: []string{"", ".a.b.c", ""},
+			output: nil,
+			err: true,
+		},
+	}
+	for _, tab := range tables {
+		output, err := Pairs(tab.names...)
+		switch {
+		case tab.err && err == nil:
+			t.Errorf("Pairs(%v) failed to produce an error", tab.names)
+		case !tab.err && err != nil:
+			t.Errorf("Pairs(%v) incorrectly produced the error %#v", tab.names, err)
+		case !tab.err && err == nil:
+			for i, s := range tab.output {
+				if i < len(output) && output[i] == s {
+					continue
+				}
+				t.Errorf("Pairs(%v) wrongly produced %v instead of %v", tab.names, output, tab.output)
+			}
+		}
+	}
+}
