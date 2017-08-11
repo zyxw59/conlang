@@ -80,11 +80,13 @@ func NewCategory(name string, elements []string) (*Category, error) {
 		Name:    name,
 	}
 	for i, e := range elements {
-		if _, ok := c.indices[e]; ok {
+		if _, ok := c.indices[e]; !ok {
+			c.indices[e] = i
+		} /* else {
+			// allow duplicate elements
 			return nil, fmt.Errorf("parse error: duplicate element %#v in category %#v.", e, c.Name)
-		}
+		} */
 		c.sorted[i] = e
-		c.indices[e] = i
 	}
 	sort.Sort(c)
 	return c, nil

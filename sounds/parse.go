@@ -126,7 +126,7 @@ func (rl *RuleList) parseRule(line string) (*Rule, error) {
 // parseCategory parses a line as a category
 func (rl *RuleList) parseCategory(line string) (*Category, error) {
 	split := strings.SplitN(line, equalstr, 2)
-	key := split[0]
+	key := strings.TrimSpace(split[0])
 	if val, ok := rl.Categories[key]; ok {
 		return nil, fmt.Errorf("category error: category '%s' already defined as %v", key, val)
 	}

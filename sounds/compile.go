@@ -8,7 +8,8 @@ import (
 )
 
 const (
-	wordBoundary = `(?:\s|^|$)`
+	wordStart = `(?:\s+|^)`
+	wordEnd   = `(?:\s+|$)`
 )
 
 // catMatcher matches a category between curly braces. Category names must
@@ -22,7 +23,7 @@ func parenReplacer(match string) string {
 	if match[1] == '?' {
 		return match
 	}
-	return fmt.Sprintf("(?:%s", match[1])
+	return fmt.Sprintf("(?:%s", strings.TrimPrefix(match, "("))
 }
 
 type CompiledRule struct {
@@ -105,22 +106,26 @@ func (r *Rule) Compile(categories CategoryList) (*CompiledRule, error) {
 	if err != nil {
 		return nil, err
 	}
-	before, err = compilePattern(r.Before+"$", categories)
+	beforeStr := strings.Replace(r.Before, "#", wordStart, -1)
+	before, err = compilePattern(beforeStr+"$", categories)
 	if err != nil {
 		return nil, err
 	}
-	after, err = compilePattern("^"+r.After, categories)
+	afterStr := strings.Replace(r.After, "#", wordEnd, -1)
+	after, err = compilePattern("^"+afterStr, categories)
 	if err != nil {
 		return nil, err
 	}
 	if r.UnBefore != "" {
-		unBefore, err = compilePattern(r.UnBefore+"$", categories)
+		unBeforeStr := strings.Replace(r.UnBefore, "#", wordStart, -1)
+		unBefore, err = compilePattern(unBeforeStr+"$", categories)
 		if err != nil {
 			return nil, err
 		}
 	}
 	if r.UnAfter != "" {
-		unAfter, err = compilePattern("^"+r.UnAfter, categories)
+		unAfterStr := strings.Replace(r.UnAfter, "#", wordEnd, -1)
+		unAfter, err = compilePattern("^"+unAfterStr, categories)
 		if err != nil {
 			return nil, err
 		}
@@ -146,8 +151,6 @@ func (r *Rule) Compile(categories CategoryList) (*CompiledRule, error) {
 func compilePattern(pattern string, categories CategoryList) (*compiledPattern, error) {
 	// first, make all capturing groups non-capturing
 	pattern = parenMatcher.ReplaceAllStringFunc(pattern, parenReplacer)
-	// second, replace '#' with wordBoundary
-	pattern = strings.Replace(pattern, "#", wordBoundary, -1)
 	// third, replace categories with regular expressions
 	pattern, nc, err := categories.categoryReplace(pattern)
 	if err != nil {

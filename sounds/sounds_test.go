@@ -34,13 +34,14 @@ func TestParseCategory(t *testing.T) {
 			},
 			err: false,
 		},
-		{
+		// This test shouldn't fail anymore
+		/* {
 			// this test should fail because the element `ŋ` is
 			// repeated
 			arg: "K = ŋ k g x ɣ ŋ",
 			cat: nil,
 			err: true,
-		},
+		}, */
 	}
 	rl := NewRuleList()
 	rl.Categories["P"] = &Category{values: []string{"p", "b", "f", "v", "m"}}
@@ -282,6 +283,12 @@ func TestApply(t *testing.T) {
 			output: "app kt",
 			err:    false,
 		},
+		{
+			rule:   "0 > a / _#",
+			word:   "top taco",
+			output: "topa tacoa",
+			err:    false,
+		},
 	}
 	rl := NewRuleList()
 	rl.ParseRuleCat("P = p t k")
@@ -355,24 +362,24 @@ func TestPairs(t *testing.T) {
 		err    bool
 	}{
 		{
-			names: []string{"", ".a.b.c"},
+			names:  []string{"", ".a.b.c"},
 			output: []string{"a", "a.b", "a.b.c"},
-			err: false,
+			err:    false,
 		},
 		{
-			names: []string{"", ".a.b.c", "c", ".d.e"},
+			names:  []string{"", ".a.b.c", "c", ".d.e"},
 			output: []string{"a", "a.b", "a.b.c", "c.d", "c.d.e"},
-			err: false,
+			err:    false,
 		},
 		{
-			names: []string{"", "a.b.c"},
+			names:  []string{"", "a.b.c"},
 			output: nil,
-			err: true,
+			err:    true,
 		},
 		{
-			names: []string{"", ".a.b.c", ""},
+			names:  []string{"", ".a.b.c", ""},
 			output: nil,
-			err: true,
+			err:    true,
 		},
 	}
 	for _, tab := range tables {
