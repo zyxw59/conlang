@@ -14,7 +14,7 @@ const (
 
 // catMatcher matches a category between curly braces. Category names must
 // start with a letter, and may not contain whitespace or '}'
-var catMatcher = regexp.MustCompile(`\{(?:(\d+):)?([\p{L}[^}\s]*)\}`)
+var catMatcher = regexp.MustCompile(`\{(?:(\d+):)?(\p{L}[^}\s]*)\}`)
 
 // parenMatcher matches a single parenthesis and the following character
 var parenMatcher = regexp.MustCompile(`\(.`)

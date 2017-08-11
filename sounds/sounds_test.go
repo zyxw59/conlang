@@ -289,10 +289,21 @@ func TestApply(t *testing.T) {
 			output: "topa tacoa",
 			err:    false,
 		},
+		{
+			rule:   "{0:Vu} > {0:Va} / #({C}+{V1})*{C}+_({C}+{V0})*{C}*#",
+			word:   "tap tapak takatə",
+			output: "táp tapák takátə",
+			err:    false,
+		},
 	}
 	rl := NewRuleList()
 	rl.ParseRuleCat("P = p t k")
 	rl.ParseRuleCat("N = m n ŋ")
+	rl.ParseRuleCat("C = {P} {N}")
+	rl.ParseRuleCat("Vu = a e i o u")
+	rl.ParseRuleCat("Va = á é í ó ú")
+	rl.ParseRuleCat("V0 = ə")
+	rl.ParseRuleCat("V1 = {Vu} {V0}")
 	for _, tab := range tables {
 		rule, err := rl.parseRule(tab.rule)
 		if err != nil {
@@ -313,6 +324,8 @@ func TestApply(t *testing.T) {
 		case !tab.err && err == nil:
 			if tab.output != output {
 				t.Errorf("Apply(%#v, %#v) produced the output %#v instead of %#v", tab.rule, tab.word, output, tab.output)
+				s, nc, err := rl.Categories.categoryReplace("({C}+{V1})")
+				t.Logf("%v %v %v", s, nc, err)
 			}
 		}
 	}
