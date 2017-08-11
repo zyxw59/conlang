@@ -106,26 +106,22 @@ func (r *Rule) Compile(categories CategoryList) (*CompiledRule, error) {
 	if err != nil {
 		return nil, err
 	}
-	beforeStr := strings.Replace(r.Before, "#", wordStart, -1)
-	before, err = compilePattern(beforeStr+"$", categories)
+	before, err = compilePattern(beforePattern(r.Before), categories)
 	if err != nil {
 		return nil, err
 	}
-	afterStr := strings.Replace(r.After, "#", wordEnd, -1)
-	after, err = compilePattern("^"+afterStr, categories)
+	after, err = compilePattern(afterPattern(r.After), categories)
 	if err != nil {
 		return nil, err
 	}
 	if r.UnBefore != "" {
-		unBeforeStr := strings.Replace(r.UnBefore, "#", wordStart, -1)
-		unBefore, err = compilePattern(unBeforeStr+"$", categories)
+		unBefore, err = compilePattern(beforePattern(r.UnBefore), categories)
 		if err != nil {
 			return nil, err
 		}
 	}
 	if r.UnAfter != "" {
-		unAfterStr := strings.Replace(r.UnAfter, "#", wordEnd, -1)
-		unAfter, err = compilePattern("^"+unAfterStr, categories)
+		unAfter, err = compilePattern(afterPattern(r.UnAfter), categories)
 		if err != nil {
 			return nil, err
 		}
@@ -145,6 +141,18 @@ func (r *Rule) Compile(categories CategoryList) (*CompiledRule, error) {
 		Categories: categories,
 		string:     r.String(),
 	}, nil
+}
+
+// beforePattern formats a pattern for use in the Before or UnBefore of a rule
+func beforePattern(pattern string) string {
+	pattern = strings.Replace(pattern, "#", wordStart, -1)
+	return fmt.Sprintf("(?:%s)$", pattern)
+}
+
+// afterPattern formats a pattern for use in the After or UnAfter of a rule
+func afterPattern(pattern string) string {
+	pattern = strings.Replace(pattern, "#", wordEnd, -1)
+	return fmt.Sprintf("^(?:%s)", pattern)
 }
 
 // compilePattern generates a compiledPattern

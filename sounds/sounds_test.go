@@ -130,10 +130,10 @@ func TestCompileRule(t *testing.T) {
 				},
 				To: "b",
 				Before: &compiledPattern{
-					Regexp: regexp.MustCompile("$"),
+					Regexp: regexp.MustCompile("(?:)$"),
 				},
 				After: &compiledPattern{
-					Regexp: regexp.MustCompile("^"),
+					Regexp: regexp.MustCompile("^(?:)"),
 				},
 			},
 			err: false,
