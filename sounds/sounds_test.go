@@ -347,6 +347,11 @@ func TestApplyFile(t *testing.T) {
 			output: "mbp",
 			err:    false,
 		},
+		{
+			word:   "abadega",
+			output: "awaeɣa",
+			err:    false,
+		},
 	}
 	filename := "test_sc"
 	rl, err := LoadFile(filename)

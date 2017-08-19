@@ -82,11 +82,11 @@ func NewCategory(name string, elements []string) (*Category, error) {
 	for i, e := range elements {
 		if _, ok := c.indices[e]; !ok {
 			c.indices[e] = i
-		} /* else {
-			// allow duplicate elements
-			return nil, fmt.Errorf("parse error: duplicate element %#v in category %#v.", e, c.Name)
-		} */
-		c.sorted[i] = e
+		}
+		// don't include zeroes in sorted list, which is used for building regeges
+		if e != "0" {
+			c.sorted[i] = e
+		}
 	}
 	sort.Sort(c)
 	return c, nil
@@ -138,7 +138,11 @@ func (c *Category) Pattern() string {
 
 // Get returns the i-th element of the category
 func (c *Category) Get(index int) string {
-	return c.values[index]
+	v := c.values[index]
+	if v == "0" {
+		return ""
+	}
+	return v
 }
 
 // Len returns the size of the category
