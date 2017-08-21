@@ -37,8 +37,8 @@ func (cl CategoryList) Replace(text string, indices map[int]int) (string, error)
 			return ""
 		}
 		i := indices[n]
-		if i >= cat.Len() || i < 0 {
-			err = fmt.Errorf("replacement error: invalid index %#v for category %#v", groups[2])
+		if i >= cat.Length() || i < 0 {
+			err = fmt.Errorf("replacement error: invalid index %#v for category %#v", i, groups[2])
 			return ""
 		}
 		return cat.Get(i)
@@ -72,10 +72,10 @@ type Category struct {
 }
 
 // NewCategory returns a category from a []string
-func NewCategory(name string, elements []string) (*Category, error) {
+func NewCategory(name string, elements []string) *Category {
 	c := &Category{
 		values:  elements,
-		sorted:  make([]string, len(elements)),
+		sorted:  make([]string, 0, len(elements)),
 		indices: make(map[string]int),
 		Name:    name,
 	}
@@ -85,11 +85,11 @@ func NewCategory(name string, elements []string) (*Category, error) {
 		}
 		// don't include zeroes in sorted list, which is used for building regeges
 		if e != "0" {
-			c.sorted[i] = e
+			c.sorted = append(c.sorted, e)
 		}
 	}
 	sort.Sort(c)
-	return c, nil
+	return c
 }
 
 // Equal compares two Categories by value
@@ -145,9 +145,14 @@ func (c *Category) Get(index int) string {
 	return v
 }
 
-// Len returns the size of the category
-func (c *Category) Len() int {
+// Length returns the size of the category, including zeros
+func (c *Category) Length() int {
 	return len(c.values)
+}
+
+// Len returns the size of the category, without zeros
+func (c *Category) Len() int {
+	return len(c.sorted)
 }
 
 func (c *Category) Swap(i, j int) {

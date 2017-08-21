@@ -13,10 +13,7 @@ func TestParseCategory(t *testing.T) {
 	}{
 		{
 			arg: "C = p t k",
-			cat: &Category{
-				values: []string{"p", "t", "k"},
-				Name:   "C",
-			},
+			cat: NewCategory("C", []string{"p", "t", "k"}),
 			err: false,
 		},
 		{
@@ -28,10 +25,12 @@ func TestParseCategory(t *testing.T) {
 		},
 		{
 			arg: "W = {P} q w",
-			cat: &Category{
-				values: []string{"p", "b", "f", "v", "m", "q", "w"},
-				Name:   "W",
-			},
+			cat: NewCategory("W", []string{"p", "b", "f", "v", "m", "q", "w"}),
+			err: false,
+		},
+		{
+			arg: "R = w r j 0",
+			cat: NewCategory("R", []string{"w", "r", "j", "0"}),
 			err: false,
 		},
 		// This test shouldn't fail anymore
@@ -54,7 +53,7 @@ func TestParseCategory(t *testing.T) {
 			t.Errorf("parseCategory(%#v) incorrectly produced the error `%v`", tab.arg, err)
 		case !tab.err && err == nil:
 			if !tab.cat.Equal(cat) {
-				t.Errorf("parseCategory(%#v) produced"+
+				t.Errorf("parseCategory(%#v) produced "+
 					"the category %#v instead of %#v",
 					tab.arg, cat, tab.cat)
 			}
@@ -106,7 +105,7 @@ func TestParseRule(t *testing.T) {
 		case tab.err && err == nil:
 			t.Errorf("parseRule(%#v) failed to produce an error", tab.arg)
 		case !tab.err && err != nil:
-			t.Errorf("parseRule(%#v) incorrectly produced the error %#v", tab.arg, err)
+			t.Errorf("parseRule(%#v) incorrectly produced the error %v", tab.arg, err)
 		case !tab.err && err == nil:
 			if *tab.rule != *rule {
 				t.Errorf("parseRule(%#v) produced the rule %#v instead of %#v",
@@ -209,10 +208,18 @@ func TestFindMatches(t *testing.T) {
 				{Start: 4, End: 5, Indices: map[int]int{}},
 			},
 		},
+		{
+			rule: "{0:W} > {0:M}",
+			word: "wat",
+			matches: []Match{
+				{Start: 0, End: 1, Indices: map[int]int{0: 0}},
+			},
+		},
 	}
 	rl := NewRuleList()
 	rl.ParseRuleCat("P = p t k")
 	rl.ParseRuleCat("N = m n ŋ")
+	rl.ParseRuleCat("W = w 0 ɣ")
 	for _, tab := range tables {
 		rule, err := rl.parseRule(tab.rule)
 		if err != nil {
@@ -352,6 +359,11 @@ func TestApplyFile(t *testing.T) {
 			output: "awaeɣa",
 			err:    false,
 		},
+		{
+			word:   "abadegam",
+			output: "amaeŋam",
+			err:    false,
+		},
 	}
 	filename := "test_sc"
 	rl, err := LoadFile(filename)
@@ -364,7 +376,7 @@ func TestApplyFile(t *testing.T) {
 		case tab.err && err == nil:
 			t.Errorf("Apply(%#v) failed to produce an error", tab.word)
 		case !tab.err && err != nil:
-			t.Errorf("Apply(%#v) incorrectly produced the error %#v", tab.word, err)
+			t.Errorf("Apply(%#v) incorrectly produced the error %v", tab.word, err)
 		case !tab.err && err == nil:
 			if tab.output != output {
 				t.Errorf("Apply(%#v) produced the output %#v instead of %#v", tab.word, output, tab.output)

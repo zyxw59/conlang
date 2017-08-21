@@ -134,9 +134,6 @@ func (rl *RuleList) parseCategory(line string) (*Category, error) {
 	for k, v := range rl.Categories {
 		values = strings.Replace(values, "{"+k+"}", v.ElemString(), -1)
 	}
-	cat, err := NewCategory(key, strings.Fields(values))
-	if err != nil {
-		return nil, err
-	}
+	cat := NewCategory(key, strings.Fields(values))
 	return cat, nil
 }
