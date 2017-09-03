@@ -1,10 +1,17 @@
 {{with RuleList `
 V = a e i o u
 C = b c d f g h j k l m n p q r s t v w x y z
-` .}}{{end -}}
+` .}}{{end}}
 
+{{- block "table" . -}}
 {{if Match . "{V} >  / _#" -}}
     {{.}}s	{{.}}j	{{.}}h
 {{- else -}}
     {{.}}es	{{.}}ej	{{.}}eh
+{{- end}}
+{{- end}}
+{{with Execute "table" . | RuleList `
+{0:C}{0:C} > {0:C}
+`}}{{.}}
+{{ApplyPairs . "" ".test_sc"}}
 {{- end}}
