@@ -143,6 +143,12 @@ func (r *Rule) Compile(categories CategoryList) (*CompiledRule, error) {
 	}, nil
 }
 
+// CompileRule compiles a rule into a set of regular expressions that can be
+// used to find matches
+func (rl *RuleList) CompileRule(rule *Rule) (*CompiledRule, error) {
+	return rule.Compile(rl.Categories)
+}
+
 // beforePattern formats a pattern for use in the Before or UnBefore of a rule
 func beforePattern(pattern string) string {
 	pattern = strings.Replace(pattern, "#", wordStart, -1)

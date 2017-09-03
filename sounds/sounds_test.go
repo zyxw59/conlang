@@ -98,9 +98,8 @@ func TestParseRule(t *testing.T) {
 			err:  false,
 		},
 	}
-	rl := NewRuleList()
 	for _, tab := range tables {
-		rule, err := rl.parseRule(tab.arg)
+		rule, err := ParseRule(tab.arg)
 		switch {
 		case tab.err && err == nil:
 			t.Errorf("parseRule(%#v) failed to produce an error", tab.arg)
@@ -221,14 +220,14 @@ func TestFindMatches(t *testing.T) {
 	rl.ParseRuleCat("N = m n ŋ")
 	rl.ParseRuleCat("W = w 0 ɣ")
 	for _, tab := range tables {
-		rule, err := rl.parseRule(tab.rule)
+		rule, err := ParseRule(tab.rule)
 		if err != nil {
-			t.Errorf("RuleList.parseRule(%#v) incorrectly produced the error %#v", tab.rule, err)
+			t.Errorf("ParseRule(%#v) incorrectly produced the error %#v", tab.rule, err)
 			continue
 		}
-		cr, err := rule.Compile(rl.Categories)
+		cr, err := rl.CompileRule(rule)
 		if err != nil {
-			t.Errorf("Rule.Compile(%#v) incorrectly produced the error %#v", tab.rule, err)
+			t.Errorf("RuleList.CompileRule(%#v) incorrectly produced the error %#v", tab.rule, err)
 			continue
 		}
 		matches := cr.FindMatches(tab.word)
@@ -312,14 +311,14 @@ func TestApply(t *testing.T) {
 	rl.ParseRuleCat("V0 = ə")
 	rl.ParseRuleCat("V1 = {Vu} {V0}")
 	for _, tab := range tables {
-		rule, err := rl.parseRule(tab.rule)
+		rule, err := ParseRule(tab.rule)
 		if err != nil {
-			t.Errorf("RuleList.parseRule(%#v) incorrectly produced the error %#v", tab.rule, err)
+			t.Errorf("ParseRule(%#v) incorrectly produced the error %#v", tab.rule, err)
 			continue
 		}
-		cr, err := rule.Compile(rl.Categories)
+		cr, err := rl.CompileRule(rule)
 		if err != nil {
-			t.Errorf("Rule.Compile(%#v) incorrectly produced the error %#v", tab.rule, err)
+			t.Errorf("RuleList.Compile(%#v) incorrectly produced the error %#v", tab.rule, err)
 			continue
 		}
 		output, _, err := cr.Apply(tab.word)

@@ -84,7 +84,7 @@ func (rl *RuleList) ParseRuleCat(line string) error {
 		// Don't parse, it's a comment
 		rl.Lines = append(rl.Lines, Comment(line))
 	case strings.Contains(line, arrowstr):
-		r, err := rl.parseRule(line)
+		r, err := ParseRule(line)
 		if err != nil {
 			return err
 		}
@@ -107,7 +107,7 @@ func (rl *RuleList) ParseRuleCat(line string) error {
 }
 
 // parseRule parses a line as a rule
-func (rl *RuleList) parseRule(line string) (*Rule, error) {
+func ParseRule(line string) (*Rule, error) {
 	matches := ruleRegExp.FindStringSubmatch(line)
 	if len(matches) < 7 {
 		return nil, fmt.Errorf("parse error: `%s` is not a valid rule", line)
